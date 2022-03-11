@@ -1,4 +1,4 @@
-# apache-modsec-modevasive
+# apache-modsec
 Apache2 mod security and mod evasive installation, configuration, and implementation
 
 ```bash
@@ -6,7 +6,7 @@ sudo su
 ```
 
 ```bash
-apt-get install libapache2-mod-security2
+apt-get install apache2 apache2-utils libapache2-mod-security2
 ```
 
 check module
@@ -77,9 +77,181 @@ restart service
 apache2ctl -t
 systemctl restart apache2
 ```
+# apache-modevasive
+
+```bash
+apt-get install libapache2-mod-evasive
+```
+
+config mod evasive config file
+
+```bash
+vi /etc/apache/mods-enabled/evasive.conf
+```
+```
+<IfModule mod_evasive20.c>
+    DOSHashTableSize    3097
+    DOSPageCount        2
+    DOSSiteCount        50
+    DOSPageInterval     1
+    DOSSiteInterval     1
+    DOSBlockingPeriod   10
+
+    DOSEmailNotify      yourmail@mail.com
+    DOSSystemCommand    "su - someuser -c '/sbin/... %s ...'"
+    DOSLogDir           "/var/log/mod_evasive"
+</IfModule>
+```
+
+buat direktory dan perizinannya
+
+```bash
+mkdir /var/log/mod_evasive && chown -R www-data:www-data /var/log/mod_evasive
+```
+
+restart service
+
+```bash
+systemctl restart apache2
+```
 
 # Test configuration
 
+### modsec test
 akses server ip dengan sql i
 
 _https://_address_/?id=3 or 'a'='a'
+
+### modevasive test
+```bash
+apt-get install perl -y
+```
+
+```
+vi /usr/share/doc/libapache2-mod-evasive/examples/test.pl
+```
+
+```
+#!/usr/bin/perl
+
+# test.pl: small script to test mod_dosevasive's effectiveness
+
+use IO::Socket;
+use strict;
+
+for(0..100) {
+  my($response);
+  my($SOCKET) = new IO::Socket::INET( Proto   => "tcp",
+                                      PeerAddr=> "127.0.0.1:80");
+  if (! defined $SOCKET) { die $!; }
+#  print $SOCKET "GET /?$_ HTTP/1.0\n\n";
+  print $SOCKET "GET /?$_ HTTP/1.0\r\nHost: 127.0.0.1\r\n\r\n\r\n";
+  $response = <$SOCKET>;
+  print $response;
+  close($SOCKET);
+}
+```
+```bash
+perl text.pl
+HTTP/1.1 200 OK
+HTTP/1.1 200 OK
+HTTP/1.1 403 Forbidden
+HTTP/1.1 200 OK
+HTTP/1.1 403 Forbidden
+HTTP/1.1 200 OK
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+HTTP/1.1 403 Forbidden
+```
