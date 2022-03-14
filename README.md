@@ -77,7 +77,7 @@ restart service
 apache2ctl -t
 systemctl restart apache2
 ```
-# apache-modevasive
+# apache-modevasive Debian family
 
 ```bash
 apt-get install libapache2-mod-evasive
@@ -113,6 +113,33 @@ restart service
 
 ```bash
 systemctl restart apache2
+```
+
+# httpd-modevasive red-hat family
+
+```bash
+yum install httpd-devel -y
+yum groupinstall 'Development tools'
+```
+
+Downloads and compile modevasive
+
+```bash
+cd /opt
+wget https://codeload.github.com/shivaas/mod_evasive/zip/master
+unzip master
+```
+
+```bash
+cd mod_evasive-master
+apxs -i -c -a mod_evasive24.o 
+```
+
+restart httpd service
+
+```bash
+systemctl restart httpd
+systemctl status httpd -l
 ```
 
 # Test configuration
